@@ -75,10 +75,11 @@ def search(maze, cost, start, end):
     return None  # Return None if no path found
 
 # Depth-Limited Search
+# In your depth_limited_search function
 def depth_limited_search(problem, limit=50):
     def recursive_dls(node, problem, limit):
         if problem.goal_test(node.state):
-            return node
+            return node  # Return the node when the goal is reached
         elif limit == 0:
             return 'cutoff'
         else:
@@ -88,7 +89,7 @@ def depth_limited_search(problem, limit=50):
                 if result == 'cutoff':
                     cutoff_occurred = True
                 elif result is not None:
-                    return result
+                    return result  # Return the goal node
             return 'cutoff' if cutoff_occurred else None
 
     return recursive_dls(Node_Depth(problem.initial), problem, limit)

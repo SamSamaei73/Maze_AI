@@ -16,11 +16,11 @@ class Node_Depth:
         self.state = state
         self.parent = parent
         self.action = action
-        self.path_cost = path_cost
+        self.path_cost = path_cost  # Initialize with the cost to reach this node
 
     def expand(self, problem):
         """Return a list of child nodes generated from this node."""
-        return [Node_Depth(next_state, self, action, problem.step_cost(self.state, action, next_state))
+        return [Node_Depth(next_state, self, action, self.path_cost + problem.step_cost(self.state, action, next_state))
                 for action, next_state in problem.successor(self.state)]
 
     def path(self):

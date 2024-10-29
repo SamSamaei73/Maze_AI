@@ -4,6 +4,7 @@ from Maze_main import run_maze_search
 from Maze_Search import depth_limited_search
 from create_problem import MazeProblem
 
+
 def find_path():
     try:
         start_x = int(start_x_entry.get())
@@ -28,22 +29,29 @@ def find_path():
     path = None
 
     if search_algo.get() == "A* Search":
-        path_maze, total_cost = run_maze_search(start, end)  # Ensure run_maze_search returns maze with path and cost
+        path_maze, total_cost = run_maze_search(start, end)
         if path_maze:
             result_text.delete(1.0, tk.END)
-            result_text.insert(tk.END, '\n'.join([''.join(["{:" ">3d}".format(item) for item in row]) for row in path_maze]))
-            cost_label.config(text=f"Total cost to reach the goal: {total_cost}")  # Update the cost label
+            result_text.insert(tk.END,
+                               '\n'.join([''.join(["{:<3}".format(item) for item in row]) for row in path_maze]))
+            cost_label.config(text=f"Total cost to reach the goal: {total_cost}")
         else:
             messagebox.showinfo("No Path", "No valid path found!")
     elif search_algo.get() == "Depth-Limited Search":
         path_node = depth_limited_search(problem, limit=limit)
         if path_node != 'cutoff':
             path = path_node.path()
+            total_cost = path_node.path_cost  # Get the accumulated cost of the path
             result_text.delete(1.0, tk.END)
-            result_text.insert(tk.END, '\n'.join([''.join(["{:" ">3d}".format(item) for item in row]) for item in path]))
-            cost_label.config(text="")  # Clear cost label if no cost is applicable
+
+            # Format the path for display, converting tuples to readable format
+            path_display = ['({},{})'.format(pos[0], pos[1]) for pos in path]
+            result_text.insert(tk.END, '\n'.join(path_display))  # Display the path as coordinates
+
+            cost_label.config(text=f"Total cost to reach the goal: {total_cost}")
         else:
             messagebox.showinfo("No Path", "No valid path found!")
+
 
 root = tk.Tk()
 root.title("Maze Search")
