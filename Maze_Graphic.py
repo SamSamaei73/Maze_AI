@@ -1,9 +1,10 @@
+# Maze_Graphic.py
+
 import tkinter as tk
 from tkinter import messagebox
 from Maze_main import run_maze_search
-from Maze_Search import depth_limited_search
+from Maze_Search import depth_limited_search, bfs, forward_chaining
 from create_problem import MazeProblem
-
 
 def find_path():
     try:
@@ -16,8 +17,8 @@ def find_path():
         messagebox.showerror("Invalid input", "Please enter valid integers for start and end coordinates.")
         return
 
-    start = [start_x, start_y]
-    end = [end_x, end_y]
+    start = (start_x, start_y)
+    end = (end_x, end_y)
 
     maze = [[0, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0],
@@ -25,8 +26,16 @@ def find_path():
             [0, 1, 0, 0, 1, 0],
             [0, 0, 0, 0, 1, 0]]
 
-    problem = MazeProblem(maze, tuple(start), tuple(end))
-    path = None
+    if maze[start[0]][start[1]] == 1:
+        messagebox.showerror("Invalid Start Position", "The start position is in a blocked cell. Please choose an open cell.")
+        return
+    if maze[end[0]][end[1]] == 1:
+        messagebox.showerror("Invalid End Position", "The end position is in a blocked cell. Please choose an open cell.")
+        return
+
+    problem = MazeProblem(maze, start, end)
+    problem.initialize_facts()
+    goal_fact = ("path", start, end)
 
     if search_algo.get() == "A* Search":
         path_maze, total_cost = run_maze_search(start, end)
@@ -41,17 +50,30 @@ def find_path():
         path_node = depth_limited_search(problem, limit=limit)
         if path_node != 'cutoff':
             path = path_node.path()
-            total_cost = path_node.path_cost  # Get the accumulated cost of the path
+            total_cost = path_node.path_cost
             result_text.delete(1.0, tk.END)
-
-            # Format the path for display, converting tuples to readable format
             path_display = ['({},{})'.format(pos[0], pos[1]) for pos in path]
-            result_text.insert(tk.END, '\n'.join(path_display))  # Display the path as coordinates
-
-            cost_label.config(text=f"Total cost to reach the goal: {total_cost}")
+            result_text.insert(tk.END, '\n'.join(path_display))
+            cost_label.config(text=f"Total explored cost: {total_cost}")
         else:
             messagebox.showinfo("No Path", "No valid path found!")
-
+    elif search_algo.get() == "Breadth-First Search":
+        path, total_cost = bfs(maze, start, end)
+        if path:
+            result_text.delete(1.0, tk.END)
+            path_display = ['({},{})'.format(pos[0], pos[1]) for pos in path]
+            result_text.insert(tk.END, '\n'.join(path_display))
+            cost_label.config(text=f"Total explored cost to reach the goal: {total_cost}")
+        else:
+            messagebox.showinfo("No Path", "No valid path found!")
+    elif search_algo.get() == "Forward-Chaining":
+        result = forward_chaining(problem, goal_fact)
+        if result:
+            result_text.delete(1.0, tk.END)
+            result_text.insert(tk.END, "Goal reached using Forward-Chaining.")
+            cost_label.config(text="Goal state reached successfully.")
+        else:
+            messagebox.showinfo("No Path", "No valid path found!")
 
 root = tk.Tk()
 root.title("Maze Search")
@@ -76,15 +98,17 @@ search_algo = tk.StringVar(value="A* Search")
 tk.Label(root, text="Select Search Algorithm:").grid(row=3, column=0, padx=10, pady=5)
 tk.Radiobutton(root, text="A* Search", variable=search_algo, value="A* Search").grid(row=3, column=1)
 tk.Radiobutton(root, text="Depth-Limited Search", variable=search_algo, value="Depth-Limited Search").grid(row=3, column=2)
+tk.Radiobutton(root, text="Breadth-First Search", variable=search_algo, value="Breadth-First Search").grid(row=3, column=3)
+tk.Radiobutton(root, text="Forward-Chaining", variable=search_algo, value="Forward-Chaining").grid(row=3, column=4)
 
 search_button = tk.Button(root, text="Find Path", command=find_path)
-search_button.grid(row=4, column=0, columnspan=3, pady=10)
+search_button.grid(row=4, column=0, columnspan=5, pady=10)
 
-result_text = tk.Text(root, height=10, width=30)
-result_text.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
+result_text = tk.Text(root, height=10, width=40)
+result_text.grid(row=5, column=0, columnspan=5, padx=10, pady=10)
 
-# Label for displaying the total cost
 cost_label = tk.Label(root, text="", font=("Arial", 12))
-cost_label.grid(row=6, column=0, columnspan=3, pady=5)
+cost_label.grid(row=6, column=0, columnspan=5, pady=5)
 
 root.mainloop()
+# /////////test/////

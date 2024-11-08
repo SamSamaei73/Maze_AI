@@ -1,4 +1,5 @@
-# Node class for A* Search
+# Maze_class.py
+
 class Node:
     def __init__(self, parent=None, position=None):
         self.parent = parent
@@ -10,7 +11,6 @@ class Node:
     def __eq__(self, other):
         return self.position == other.position
 
-# Node_Depth class for Depth-Limited Search
 class Node_Depth:
     def __init__(self, state, parent=None, action=None, path_cost=0):
         self.state = state
