@@ -1,3 +1,5 @@
+# Maze_main.py
+
 from Maze_Search import search
 
 def run_maze_search(start, end):
