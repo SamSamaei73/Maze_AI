@@ -68,5 +68,3 @@ class MazeProblem:
                 if self.maze[row][col] == 0:
                     self.successor((row, col))  # Generates paths and adds facts
         print(f"Initial facts after setup: {self.facts}")
-
-# //////Test///

@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from Maze_main import run_maze_search
-from Maze_Search import depth_limited_search, bfs, forward_chaining
+from Maze_Search import depth_limited_search, bfs
 from create_problem import MazeProblem
 
 def find_path():
@@ -66,14 +66,6 @@ def find_path():
             cost_label.config(text=f"Total explored cost to reach the goal: {total_cost}")
         else:
             messagebox.showinfo("No Path", "No valid path found!")
-    elif search_algo.get() == "Forward-Chaining":
-        result = forward_chaining(problem, goal_fact)
-        if result:
-            result_text.delete(1.0, tk.END)
-            result_text.insert(tk.END, "Goal reached using Forward-Chaining.")
-            cost_label.config(text="Goal state reached successfully.")
-        else:
-            messagebox.showinfo("No Path", "No valid path found!")
 
 root = tk.Tk()
 root.title("Maze Search")
@@ -99,7 +91,6 @@ tk.Label(root, text="Select Search Algorithm:").grid(row=3, column=0, padx=10, p
 tk.Radiobutton(root, text="A* Search", variable=search_algo, value="A* Search").grid(row=3, column=1)
 tk.Radiobutton(root, text="Depth-Limited Search", variable=search_algo, value="Depth-Limited Search").grid(row=3, column=2)
 tk.Radiobutton(root, text="Breadth-First Search", variable=search_algo, value="Breadth-First Search").grid(row=3, column=3)
-tk.Radiobutton(root, text="Forward-Chaining", variable=search_algo, value="Forward-Chaining").grid(row=3, column=4)
 
 search_button = tk.Button(root, text="Find Path", command=find_path)
 search_button.grid(row=4, column=0, columnspan=5, pady=10)
@@ -111,4 +102,3 @@ cost_label = tk.Label(root, text="", font=("Arial", 12))
 cost_label.grid(row=6, column=0, columnspan=5, pady=5)
 
 root.mainloop()
-# /////////test/////

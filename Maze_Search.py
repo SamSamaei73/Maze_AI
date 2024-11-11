@@ -5,34 +5,6 @@ from collections import deque
 from Maze_class import Node, Node_Depth
 from create_problem import MazeProblem
 
-
-# Forward-Chaining to reach the goal
-def forward_chaining(problem, goal):
-    """Run forward chaining to determine if there is a path to the goal."""
-    print("Initial Facts:", problem.facts)
-    print("Goal:", goal)
-
-    explored_cost = 0  # Total cost for each application of rules
-    step = 1
-    while goal not in problem.facts:
-        print(f"\n--- Step {step} ---")
-        problem.apply_rules()
-        explored_cost += 1  # Count this step in the total exploration cost
-        if goal in problem.facts:
-            print(f"\nGoal {goal} reached after {step} steps.")
-            print(f"Total explored cost: {explored_cost}")
-            return True
-        if not problem.apply_rules():
-            print("No new inferences. Goal cannot be reached.")
-            print(f"Total explored cost: {explored_cost}")
-            return False
-        step += 1
-
-    print(f"\nGoal {goal} reached after {step - 1} steps.")
-    print(f"Total explored cost: {explored_cost}")
-    return True
-
-
 # Depth-Limited Search
 def depth_limited_search(problem, limit=50):
     explored_cost = 0  # Total explored cost
