@@ -23,7 +23,6 @@ class MazeProblem:
     def add_fact(self, fact):
         """Add a new fact about a path in the maze."""
         if fact not in self.facts:
-            print(f"Adding fact: {fact}")
             self.facts.add(fact)
 
     def apply_rules(self):
@@ -39,10 +38,8 @@ class MazeProblem:
                                 new_fact = ("path", x, z)
                                 if new_fact not in self.facts and new_fact not in inferred_facts:
                                     inferred_facts.add(new_fact)
-                                    print(f"Inferred new path: {new_fact}")
 
             if not inferred_facts:
-                print("No more inferences possible.")
                 break  # Exit the loop if no new inferences were made
 
             self.facts.update(inferred_facts)  # Add inferred facts
@@ -67,4 +64,3 @@ class MazeProblem:
             for col in range(self.cols):
                 if self.maze[row][col] == 0:
                     self.successor((row, col))  # Generates paths and adds facts
-        print(f"Initial facts after setup: {self.facts}")
