@@ -1,91 +1,19 @@
-# Maze_Search.py
-
 from collections import deque
-from Maze_class import Node, Node_Depth
-from create_problem import MazeProblem
-
-def return_path(current_node, maze):
-    path = []
-    current = current_node
-    while current is not None:
-        path.append(current.position)
-        current = current.parent
-    path.reverse()
-
-    no_rows, no_columns = len(maze), len(maze[0])
-    result = [[-1 for _ in range(no_columns)] for _ in range(no_rows)]
-
-    for idx, position in enumerate(path):
-        result[position[0]][position[1]] = idx
-
-    return result
-
-def search(maze, cost, start, end):
-    start_node = Node(None, tuple(start))
-    end_node = Node(None, tuple(end))
-
-    yet_to_visit_dict = {start_node.position: start_node}
-    visited_dict = {}
-    explored_cost = 0
-
-    move_options = [[-1, 0], [0, -1], [1, 0], [0, 1]]
-    max_iterations = (len(maze) // 2) * 10
-    outer_iterations = 0
-
-    while yet_to_visit_dict:
-        outer_iterations += 1
-        if outer_iterations > max_iterations:
-            print("Too many iterations, exiting!")
-            return None
-
-        current_node = min(yet_to_visit_dict.values(), key=lambda node: node.f)
-        current_position = current_node.position
-
-        explored_cost += 1
-
-        del yet_to_visit_dict[current_position]
-        visited_dict[current_position] = current_node
-
-        if current_node == end_node:
-            path_maze = return_path(current_node, maze)
-            return path_maze, explored_cost
-
-        children = []
-        for new_position in move_options:
-            node_position = (current_position[0] + new_position[0], current_position[1] + new_position[1])
-
-            if (0 <= node_position[0] < len(maze) and
-                    0 <= node_position[1] < len(maze[0]) and
-                    maze[node_position[0]][node_position[1]] == 0):
-                new_node = Node(current_node, node_position)
-                children.append(new_node)
-
-        for child in children:
-            if child.position in visited_dict:
-                continue
-
-            child.g = current_node.g + cost
-            child.h = ((child.position[0] - end_node.position[0]) ** 2 +
-                       (child.position[1] - end_node.position[1]) ** 2)
-            child.f = child.g + child.h
-
-            if child.position in yet_to_visit_dict:
-                existing_node = yet_to_visit_dict[child.position]
-                if existing_node.g <= child.g:
-                    continue
-
-            yet_to_visit_dict[child.position] = child
-
-    print("Goal not reachable")
-    return None
+from Maze_class import Node_Depth
 
 def depth_limited_search(problem, limit=50):
-    explored_cost = 0
-    visited = set()
+    """
+    Depth-Limited Search (DLS) with correct cost calculation.
+    Counts all unique nodes explored during the search, including wrong steps.
+    """
+    explored_nodes = set()  # Set to store all unique nodes visited
 
-    def recursive_dls(node, problem, limit, visited_in_path):
-        nonlocal explored_cost
-        explored_cost += 1
+    def recursive_dls(node, problem, limit):
+        nonlocal explored_nodes
+
+        # Count the current node if it's not already in explored_nodes
+        if node.state not in explored_nodes:
+            explored_nodes.add(node.state)
 
         if problem.goal_test(node.state):
             return node
@@ -94,53 +22,52 @@ def depth_limited_search(problem, limit=50):
         else:
             cutoff_occurred = False
             for child in node.expand(problem):
-                if child.state in visited or child.state in visited_in_path:
-                    continue
-                visited_in_path.add(child.state)
-
-                result = recursive_dls(child, problem, limit - 1, visited_in_path)
-                if result == 'cutoff':
-                    cutoff_occurred = True
-                elif result is not None:
-                    return result
-                visited_in_path.remove(child.state)
-
+                if child.state not in explored_nodes:  # Avoid revisiting nodes in the recursion
+                    result = recursive_dls(child, problem, limit - 1)
+                    if result == 'cutoff':
+                        cutoff_occurred = True
+                    elif result is not None:
+                        return result
             return 'cutoff' if cutoff_occurred else None
 
-    result = recursive_dls(Node_Depth(problem.initial), problem, limit, set())
-    return result
+    start_node = Node_Depth(problem.initial)
+    result = recursive_dls(start_node, problem, limit)
+    return result, len(explored_nodes)  # Return the result and total explored cost
+
 
 def bfs(maze, start, end):
+    """
+    Breadth-First Search (BFS) with correct cost calculation.
+    Counts all unique nodes explored during the search, including wrong steps.
+    """
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     rows, cols = len(maze), len(maze[0])
 
-    queue = deque([(start, 0)])
-    visited = set([start])
+    queue = deque([start])
+    visited = set([start])  # Set to store all unique nodes visited
     parent = {start: None}
-    total_explored_cost = 0
 
     while queue:
-        current, current_cost = queue.popleft()
-        total_explored_cost += 1
+        current = queue.popleft()
 
         if current == end:
             break
 
         for direction in directions:
-            new_row = current[0] + direction[0]
-            new_col = current[1] + direction[1]
+            new_row, new_col = current[0] + direction[0], current[1] + direction[1]
             new_node = (new_row, new_col)
 
             if (0 <= new_row < rows and 0 <= new_col < cols and
                     maze[new_row][new_col] == 0 and new_node not in visited):
-                queue.append((new_node, current_cost + 1))
-                visited.add(new_node)
+                queue.append(new_node)
+                visited.add(new_node)  # Mark as visited
                 parent[new_node] = current
 
+    # Reconstruct the path from start to end
     path = []
     current = end
     while current is not None:
         path.append(current)
         current = parent.get(current)
 
-    return path[::-1], total_explored_cost
+    return path[::-1], len(visited)  # Return path and total explored cost
